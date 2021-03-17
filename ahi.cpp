@@ -14,6 +14,7 @@ AHI::~AHI() {
 }
 
 LPVOID AHI::hook_func(LPVOID func_addr, LPVOID dst_func) {
+    func_addr = (LPVOID)((uintptr_t)func_addr - (uintptr_t)pe + (uintptr_t)base_addr);
     if (func_backups.find(func_addr) != func_backups.end()) {
         std::cerr << __FUNCTION__ << ": " << func_addr << " is already hooked!"
                   << std::endl;
@@ -63,6 +64,7 @@ LPVOID AHI::hook_func(LPVOID func_addr, LPVOID dst_func) {
 }
 
 LPVOID AHI::unhook_func(LPVOID func_addr) {
+    func_addr = (LPVOID)((uintptr_t)func_addr - (uintptr_t)pe + (uintptr_t)base_addr);
     if (func_backups.find(func_addr) == func_backups.end()) {
         std::cerr << __FUNCTION__ << ": " << func_addr << " is not hooked!"
                   << std::endl;
@@ -108,7 +110,9 @@ LPVOID AHI::hook_dll_func(std::string dll, std::string func_name,
         return 0;
     }
     std::cout << dll << "." << func_name << ": ";
-    return func_addr = hook_func(func_addr, dst_func_addr);
+    // Pointer arithmetic required because hook_func doesn't expect absolute address.
+    return func_addr = hook_func((LPVOID)((uintptr_t)func_addr + (uintptr_t)pe - (uintptr_t)base_addr),
+                                 dst_func_addr);
 }
 
 LPVOID AHI::unhook_dll_func(std::string dll, std::string func_name) {
@@ -125,5 +129,6 @@ LPVOID AHI::unhook_dll_func(std::string dll, std::string func_name) {
         return 0;
     }
     std::cout << dll << "." << func_name << ": ";
-    return unhook_func(func_addr);
+    // Pointer arithmetic required because unhook_func doesn't expect absolute address.
+    return unhook_func((LPVOID)((uintptr_t)func_addr + (uintptr_t)pe - (uintptr_t)base_addr));
 }
