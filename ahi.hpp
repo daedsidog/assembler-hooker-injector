@@ -12,16 +12,18 @@
 class AHI {
     LPVOID base_addr = 0x0;
     LPVOID pe = 0x0;
-    BYTE jmp_opcode[JMP_OPCODE_SIZE] = { JMP_OPCODE_BYTES };
+    BYTE jmp_opcode[JMP_OPCODE_SIZE] = {JMP_OPCODE_BYTES};
 
     std::map<LPVOID, BYTE[JMP_OPCODE_SIZE]> func_backups;
-public:
+
+  public:
     AHI(LPVOID image_base = 0x0);
     ~AHI();
 
     LPVOID hook_func(LPVOID func_addr, LPVOID dst_func_addr);
     LPVOID unhook_func(LPVOID func_addr);
-    LPVOID hook_dll_func(std::string dll, std::string func_name, LPVOID dst_func_addr);
+    LPVOID hook_dll_func(std::string dll, std::string func_name,
+                         LPVOID dst_func_addr);
     LPVOID unhook_dll_func(std::string dll, std::string func_name);
 };
 
