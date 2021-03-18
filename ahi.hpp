@@ -31,7 +31,7 @@ class AHI {
                          LPVOID dst_func_addr);
     // Unhook from dll.func_name.
     LPVOID unhook_dll_func(std::string dll, std::string func_name);
-    // Change bytecodes [start_addr, end_addr] to NOP & inject func_addr to
+    // Change bytecodes [start_addr, end_addr) to NOP & inject func_addr to
     // start_addr. Mostly useful for injecting inline assembly in an address
     // range.
     LPVOID inject_func(uintptr_t start_addr, uintptr_t end_addr,

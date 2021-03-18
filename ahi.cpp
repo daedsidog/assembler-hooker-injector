@@ -9,10 +9,10 @@ AHI::AHI(uintptr_t image_base) {
 
 AHI::~AHI() {
     for (int i = 0; i < func_backups.size(); ++i) {
-        unhook_func((uintptr_t)func_backups.begin()->first);
+        unhook_func((uintptr_t)func_backups.begin()->first + (uintptr_t)pe - (uintptr_t)base_addr);
     }
     for (int i = 0; i < opcode_backups.size(); ++i) {
-        eject_func((uintptr_t)opcode_backups.begin()->first.first);
+        eject_func((uintptr_t)opcode_backups.begin()->first.first + (uintptr_t)pe - (uintptr_t)base_addr);
     }
 }
 
@@ -193,7 +193,7 @@ LPVOID AHI::inject_func(uintptr_t start_addr, uintptr_t end_addr,
     opcode_backups[std::pair<LPVOID, LPVOID>((LPVOID)start_addr,
                                              (LPVOID)end_addr)] = backup;
     if (!ReadProcessMemory(process_handle, (LPVOID)start_addr, backup,
-                           JMP_OPCODE_SIZE, 0)) {
+                           size, 0)) {
         std::cerr << __FUNCTION__
                   << ": ReadProcessMemory error: " << GetLastError()
                   << std::endl;
@@ -237,16 +237,16 @@ LPVOID AHI::inject_func(uintptr_t start_addr, uintptr_t end_addr,
         return 0;
     }
     std::cout << "Injected " << func_addr << " into [" << (LPVOID)start_addr
-              << ", " << (LPVOID)end_addr << "]" << std::endl;
+              << ", " << (LPVOID)end_addr << ")" << std::endl;
     return (LPVOID)start_addr;
 }
 
 LPVOID AHI::eject_func(uintptr_t start_addr) {
+    start_addr = start_addr - (uintptr_t)pe + (uintptr_t)base_addr;
     for (auto const &opcode_backup : opcode_backups) {
         LPVOID backup_start_addr = opcode_backup.first.first;
         LPVOID backup_end_addr = opcode_backup.first.second;
         if ((LPVOID)start_addr == backup_start_addr) {
-            start_addr = start_addr - (uintptr_t)pe + (uintptr_t)base_addr;
             HANDLE process_handle = GetCurrentProcess();
             if (!process_handle) {
                 std::cerr << __FUNCTION__
@@ -270,7 +270,7 @@ LPVOID AHI::eject_func(uintptr_t start_addr) {
                 return 0;
             }
             std::cout << "Ejected function from [" << backup_start_addr << ", "
-                      << backup_end_addr << "]" << std::endl;
+                      << backup_end_addr << ")" << std::endl;
             delete[] opcode_backup.second;
             opcode_backups.erase(opcode_backup.first);
             return backup_start_addr;
