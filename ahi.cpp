@@ -41,12 +41,14 @@ LPVOID AHI::hook_func(uintptr_t func_addr, LPVOID dst_func_addr) {
                   << std::endl;
         return 0;
     }
+    BYTE backup[JMP_OPCODE_SIZE];
     if (!ReadProcessMemory(process_handle, (LPVOID)func_addr,
                            func_backups[(LPVOID)func_addr], JMP_OPCODE_SIZE,
                            0)) {
         std::cerr << __FUNCTION__
                   << ": ReadProcessMemory error: " << GetLastError()
                   << std::endl;
+        func_backups.erase((LPVOID)func_addr);
         return 0;
     }
     LPVOID dst_func_relative_addr =
@@ -60,18 +62,21 @@ LPVOID AHI::hook_func(uintptr_t func_addr, LPVOID dst_func_addr) {
         std::cerr << __FUNCTION__
                   << ": WriteProcessMemory error: " << GetLastError()
                   << std::endl;
+        func_backups.erase((LPVOID)func_addr);
         return 0;
     }
     if (!VirtualProtect((LPVOID)func_addr, JMP_OPCODE_SIZE, previous_protection,
                         &previous_protection)) {
         std::cerr << __FUNCTION__
                   << ": VirtualProtect error: " << GetLastError() << std::endl;
+        func_backups.erase((LPVOID)func_addr);
         return 0;
     }
     if (!FlushInstructionCache(process_handle, 0, 0)) {
         std::cerr << __FUNCTION__
                   << ": FlushInstructionCache error: " << GetLastError()
                   << std::endl;
+        func_backups.erase((LPVOID)func_addr);
         return 0;
     }
     std::cout << "Hooked " << dst_func_relative_addr << " to "
@@ -190,8 +195,6 @@ LPVOID AHI::inject_func(uintptr_t start_addr, uintptr_t end_addr,
     }
     uintptr_t size = end_addr - start_addr;
     BYTE *backup = new BYTE[size];
-    opcode_backups[std::pair<LPVOID, LPVOID>((LPVOID)start_addr,
-                                             (LPVOID)end_addr)] = backup;
     if (!ReadProcessMemory(process_handle, (LPVOID)start_addr, backup,
                            size, 0)) {
         std::cerr << __FUNCTION__
@@ -200,7 +203,7 @@ LPVOID AHI::inject_func(uintptr_t start_addr, uintptr_t end_addr,
         return 0;
     }
     LPVOID dst_func_relative_addr =
-        (LPVOID)((uintptr_t)func_addr - start_addr - JMP_OPCODE_SIZE);
+        (LPVOID)((uintptr_t)func_addr - start_addr - CALL_OPCODE_SIZE);
     DWORD previous_protection;
     VirtualProtect((LPVOID)func_addr, size, PAGE_EXECUTE_READWRITE,
                    &previous_protection);
@@ -216,9 +219,9 @@ LPVOID AHI::inject_func(uintptr_t start_addr, uintptr_t end_addr,
         return 0;
     }
     delete[] nops;
-    memcpy(&jmp_opcode[1], &dst_func_relative_addr, ADDR_SIZE);
-    if (!WriteProcessMemory(process_handle, (LPVOID)start_addr, jmp_opcode,
-                            JMP_OPCODE_SIZE, 0)) {
+    memcpy(&call_opcode[1], &dst_func_relative_addr, ADDR_SIZE);
+    if (!WriteProcessMemory(process_handle, (LPVOID)start_addr, call_opcode,
+                            CALL_OPCODE_SIZE, 0)) {
         std::cerr << __FUNCTION__
                   << ": 2nd WriteProcessMemory error: " << GetLastError()
                   << std::endl;
@@ -238,6 +241,8 @@ LPVOID AHI::inject_func(uintptr_t start_addr, uintptr_t end_addr,
     }
     std::cout << "Injected " << func_addr << " into [" << (LPVOID)start_addr
               << ", " << (LPVOID)end_addr << ")" << std::endl;
+    opcode_backups[std::pair<LPVOID, LPVOID>((LPVOID)start_addr,
+                                             (LPVOID)end_addr)] = backup;
     return (LPVOID)start_addr;
 }
 

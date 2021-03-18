@@ -6,14 +6,17 @@
 #include <map>
 
 #define ADDR_SIZE 4
-#define JMP_OPCODE_BYTES 0xe9, 0x0, 0x0, 0x0, 0x0
+#define JMP_OPCODE_BYTES 0xE9, 0x0, 0x0, 0x0, 0x0
+#define CALL_OPCODE_BYTES 0xE8, 0x0, 0x0, 0x0, 0x0
 #define NOP_OPCODE 0x90
 #define JMP_OPCODE_SIZE 5
+#define CALL_OPCODE_SIZE 5
 
 class AHI {
     LPVOID base_addr = 0x0;
     LPVOID pe = 0x0;
     BYTE jmp_opcode[JMP_OPCODE_SIZE] = {JMP_OPCODE_BYTES};
+    BYTE call_opcode[CALL_OPCODE_SIZE] = {CALL_OPCODE_BYTES};
 
     std::map<LPVOID, BYTE[JMP_OPCODE_SIZE]> func_backups;
     std::map<std::pair<LPVOID, LPVOID>, BYTE *> opcode_backups;
