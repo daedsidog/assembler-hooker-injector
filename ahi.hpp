@@ -6,9 +6,9 @@
 #include <map>
 
 #define ADDR_SIZE 4
-#define JMP_OPCODE_BYTES 0xe9, 0x0, 0x0, 0x0, 0x0, 0xc3
-#define JMP_OPCODE_SIZE 6
+#define JMP_OPCODE_BYTES 0xe9, 0x0, 0x0, 0x0, 0x0
 #define NOP_OPCODE 0x90
+#define JMP_OPCODE_SIZE 5
 
 class AHI {
     LPVOID base_addr = 0x0;
