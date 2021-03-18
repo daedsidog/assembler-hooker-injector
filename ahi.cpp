@@ -50,7 +50,7 @@ LPVOID AHI::hook_func(uintptr_t func_addr, LPVOID dst_func_addr) {
         return 0;
     }
     LPVOID dst_func_relative_addr =
-        (LPVOID)((uintptr_t)dst_func_addr - func_addr - (JMP_OPCODE_SIZE - 1));
+        (LPVOID)((uintptr_t)dst_func_addr - func_addr - JMP_OPCODE_SIZE);
     DWORD previous_protection;
     VirtualProtect((LPVOID)func_addr, JMP_OPCODE_SIZE, PAGE_EXECUTE_READWRITE,
                    &previous_protection);
@@ -200,7 +200,7 @@ LPVOID AHI::inject_func(uintptr_t start_addr, uintptr_t end_addr,
         return 0;
     }
     LPVOID dst_func_relative_addr =
-        (LPVOID)((uintptr_t)func_addr - start_addr - (JMP_OPCODE_SIZE - 1));
+        (LPVOID)((uintptr_t)func_addr - start_addr - JMP_OPCODE_SIZE);
     DWORD previous_protection;
     VirtualProtect((LPVOID)func_addr, size, PAGE_EXECUTE_READWRITE,
                    &previous_protection);
