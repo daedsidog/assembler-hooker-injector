@@ -2,22 +2,16 @@
 
 #include <iostream>
 
-AHI::AHI(uintptr_t image_base) {
-    base_addr = GetModuleHandle(0x0);
-    pe = (LPVOID)image_base;
-}
+uintptr_t AHI::base_addr = 0x0;
+std::map<LPVOID, BYTE[JMP_OPCODE_SIZE]> AHI::func_backups;
+std::map<std::pair<LPVOID, LPVOID>, BYTE *> AHI::opcode_backups;
 
-AHI::~AHI() {
-    for (int i = 0; i < func_backups.size(); ++i) {
-        unhook_func((uintptr_t)func_backups.begin()->first + (uintptr_t)pe - (uintptr_t)base_addr);
-    }
-    for (int i = 0; i < opcode_backups.size(); ++i) {
-        eject_func((uintptr_t)opcode_backups.begin()->first.first + (uintptr_t)pe - (uintptr_t)base_addr);
-    }
+void AHI::init(void){
+    base_addr = (uintptr_t)GetModuleHandle(nullptr);
 }
 
 LPVOID AHI::hook_func(uintptr_t func_addr, LPVOID dst_func_addr) {
-    func_addr = func_addr - (uintptr_t)pe + (uintptr_t)base_addr;
+    func_addr = func_addr + base_addr;
     if (func_backups.find((LPVOID)func_addr) != func_backups.end()) {
         std::cerr << __FUNCTION__ << ": " << (LPVOID)func_addr
                   << " is already hooked!" << std::endl;
@@ -56,6 +50,7 @@ LPVOID AHI::hook_func(uintptr_t func_addr, LPVOID dst_func_addr) {
     DWORD previous_protection;
     VirtualProtect((LPVOID)func_addr, JMP_OPCODE_SIZE, PAGE_EXECUTE_READWRITE,
                    &previous_protection);
+    BYTE jmp_opcode[JMP_OPCODE_SIZE] = { JMP_OPCODE_BYTES };
     memcpy(&jmp_opcode[1], &dst_func_relative_addr, ADDR_SIZE);
     if (!WriteProcessMemory(process_handle, (LPVOID)func_addr, jmp_opcode,
                             JMP_OPCODE_SIZE, 0)) {
@@ -85,7 +80,7 @@ LPVOID AHI::hook_func(uintptr_t func_addr, LPVOID dst_func_addr) {
 }
 
 LPVOID AHI::unhook_func(uintptr_t func_addr) {
-    func_addr = func_addr - (uintptr_t)pe + (uintptr_t)base_addr;
+    func_addr = func_addr + base_addr;
     if (func_backups.find((LPVOID)func_addr) == func_backups.end()) {
         std::cerr << __FUNCTION__ << ": " << func_addr << " is not hooked!"
                   << std::endl;
@@ -134,8 +129,7 @@ LPVOID AHI::hook_dll_func(std::string dll, std::string func_name,
     std::cout << dll << "." << func_name << ": ";
     // Pointer arithmetic required because hook_func doesn't expect absolute
     // address.
-    return hook_func((uintptr_t)func_addr + (uintptr_t)pe -
-                         (uintptr_t)base_addr,
+    return hook_func((uintptr_t)func_addr + base_addr,
                      dst_func_addr);
 }
 
@@ -155,14 +149,13 @@ LPVOID AHI::unhook_dll_func(std::string dll, std::string func_name) {
     std::cout << dll << "." << func_name << ": ";
     // Pointer arithmetic required because unhook_func doesn't expect absolute
     // address.
-    return unhook_func((uintptr_t)func_addr + (uintptr_t)pe -
-                       (uintptr_t)base_addr);
+    return unhook_func((uintptr_t)func_addr + base_addr);
 }
 
 LPVOID AHI::inject_func(uintptr_t start_addr, uintptr_t end_addr,
                         LPVOID func_addr) {
-    start_addr = start_addr - (uintptr_t)pe + (uintptr_t)base_addr;
-    end_addr = end_addr - (uintptr_t)pe + (uintptr_t)base_addr;
+    start_addr = start_addr + base_addr;
+    end_addr = end_addr + base_addr;
     for (auto const &opcode_backup : opcode_backups) {
         LPVOID backup_start_addr = opcode_backup.first.first;
         LPVOID backup_end_addr = opcode_backup.first.second;
@@ -219,6 +212,7 @@ LPVOID AHI::inject_func(uintptr_t start_addr, uintptr_t end_addr,
         return 0;
     }
     delete[] nops;
+    BYTE call_opcode[CALL_OPCODE_SIZE] = { CALL_OPCODE_BYTES };
     memcpy(&call_opcode[1], &dst_func_relative_addr, ADDR_SIZE);
     if (!WriteProcessMemory(process_handle, (LPVOID)start_addr, call_opcode,
                             CALL_OPCODE_SIZE, 0)) {
@@ -247,7 +241,7 @@ LPVOID AHI::inject_func(uintptr_t start_addr, uintptr_t end_addr,
 }
 
 LPVOID AHI::eject_func(uintptr_t start_addr) {
-    start_addr = start_addr - (uintptr_t)pe + (uintptr_t)base_addr;
+    start_addr = start_addr + base_addr;
     for (auto const &opcode_backup : opcode_backups) {
         LPVOID backup_start_addr = opcode_backup.first.first;
         LPVOID backup_end_addr = opcode_backup.first.second;
