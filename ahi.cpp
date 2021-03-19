@@ -6,9 +6,7 @@ uintptr_t AHI::base_addr = 0x0;
 std::map<LPVOID, BYTE[JMP_OPCODE_SIZE]> AHI::func_backups;
 std::map<std::pair<LPVOID, LPVOID>, BYTE *> AHI::opcode_backups;
 
-void AHI::init(void){
-    base_addr = (uintptr_t)GetModuleHandle(nullptr);
-}
+void AHI::init(void) { base_addr = (uintptr_t)GetModuleHandle(nullptr); }
 
 LPVOID AHI::hook_func(uintptr_t func_addr, LPVOID dst_func_addr) {
     func_addr = func_addr + base_addr;
@@ -20,7 +18,8 @@ LPVOID AHI::hook_func(uintptr_t func_addr, LPVOID dst_func_addr) {
     for (auto const &opcode_backup : opcode_backups) {
         LPVOID backup_start_addr = opcode_backup.first.first;
         LPVOID backup_end_addr = opcode_backup.first.second;
-        if ((LPVOID)func_addr >= backup_start_addr && (LPVOID)func_addr <= backup_end_addr){
+        if ((LPVOID)func_addr >= backup_start_addr &&
+            (LPVOID)func_addr <= backup_end_addr) {
             std::cerr << __FUNCTION__
                       << ": Target is located inside function injection range ["
                       << backup_start_addr << ", " << backup_end_addr << "]!"
@@ -50,7 +49,7 @@ LPVOID AHI::hook_func(uintptr_t func_addr, LPVOID dst_func_addr) {
     DWORD previous_protection;
     VirtualProtect((LPVOID)func_addr, JMP_OPCODE_SIZE, PAGE_EXECUTE_READWRITE,
                    &previous_protection);
-    BYTE jmp_opcode[JMP_OPCODE_SIZE] = { JMP_OPCODE_BYTES };
+    BYTE jmp_opcode[JMP_OPCODE_SIZE] = {JMP_OPCODE_BYTES};
     memcpy(&jmp_opcode[1], &dst_func_relative_addr, ADDR_SIZE);
     if (!WriteProcessMemory(process_handle, (LPVOID)func_addr, jmp_opcode,
                             JMP_OPCODE_SIZE, 0)) {
@@ -129,8 +128,7 @@ LPVOID AHI::hook_dll_func(std::string dll, std::string func_name,
     std::cout << dll << "." << func_name << ": ";
     // Pointer arithmetic required because hook_func doesn't expect absolute
     // address.
-    return hook_func((uintptr_t)func_addr + base_addr,
-                     dst_func_addr);
+    return hook_func((uintptr_t)func_addr + base_addr, dst_func_addr);
 }
 
 LPVOID AHI::unhook_dll_func(std::string dll, std::string func_name) {
@@ -188,8 +186,8 @@ LPVOID AHI::inject_func(uintptr_t start_addr, uintptr_t end_addr,
     }
     uintptr_t size = end_addr - start_addr;
     BYTE *backup = new BYTE[size];
-    if (!ReadProcessMemory(process_handle, (LPVOID)start_addr, backup,
-                           size, 0)) {
+    if (!ReadProcessMemory(process_handle, (LPVOID)start_addr, backup, size,
+                           0)) {
         std::cerr << __FUNCTION__
                   << ": ReadProcessMemory error: " << GetLastError()
                   << std::endl;
@@ -212,7 +210,7 @@ LPVOID AHI::inject_func(uintptr_t start_addr, uintptr_t end_addr,
         return 0;
     }
     delete[] nops;
-    BYTE call_opcode[CALL_OPCODE_SIZE] = { CALL_OPCODE_BYTES };
+    BYTE call_opcode[CALL_OPCODE_SIZE] = {CALL_OPCODE_BYTES};
     memcpy(&call_opcode[1], &dst_func_relative_addr, ADDR_SIZE);
     if (!WriteProcessMemory(process_handle, (LPVOID)start_addr, call_opcode,
                             CALL_OPCODE_SIZE, 0)) {

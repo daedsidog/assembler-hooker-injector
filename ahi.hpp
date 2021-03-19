@@ -5,10 +5,10 @@
 #include <string>
 #include <map>
 
-#define ADDR_SIZE 4
-#define JMP_OPCODE_BYTES 0xE9, 0x0, 0x0, 0x0, 0x0
-#define CALL_OPCODE_BYTES 0xE8, 0x0, 0x0, 0x0, 0x0
+#define JMP_OPCODE_BYTES 0xe9, 0x0, 0x0, 0x0, 0x0
+#define CALL_OPCODE_BYTES 0xe8, 0x0, 0x0, 0x0, 0x0
 #define NOP_OPCODE 0x90
+#define ADDR_SIZE 4
 #define JMP_OPCODE_SIZE 5
 #define CALL_OPCODE_SIZE 5
 
@@ -27,14 +27,14 @@ class AHI {
     static LPVOID unhook_func(uintptr_t func_addr);
     // Hook dst_func_addr to dll.func_name.
     static LPVOID hook_dll_func(std::string dll, std::string func_name,
-                         LPVOID dst_func_addr);
+                                LPVOID dst_func_addr);
     // Unhook from dll.func_name.
     static LPVOID unhook_dll_func(std::string dll, std::string func_name);
     // Change bytecodes [start_addr, end_addr) to NOP & inject func_addr to
     // start_addr. Mostly useful for injecting inline assembly in an address
     // range.
     static LPVOID inject_func(uintptr_t start_addr, uintptr_t end_addr,
-                       LPVOID func_addr);
+                              LPVOID func_addr);
     // Restore bytecodes & remove function injected at start_addr.
     static LPVOID eject_func(uintptr_t start_addr);
 };
