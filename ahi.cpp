@@ -34,7 +34,6 @@ LPVOID AHI::hook_func(uintptr_t func_addr, LPVOID dst_func_addr) {
                   << std::endl;
         return 0;
     }
-    BYTE backup[JMP_OPCODE_SIZE];
     if (!ReadProcessMemory(process_handle, (LPVOID)func_addr,
                            func_backups[(LPVOID)func_addr], JMP_OPCODE_SIZE,
                            0)) {
