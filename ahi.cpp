@@ -157,8 +157,8 @@ LPVOID AHI::inject_func(uintptr_t start_addr, uintptr_t end_addr,
         LPVOID backup_start_addr = opcode_backup.first.first;
         LPVOID backup_end_addr = opcode_backup.first.second;
         if ((LPVOID)start_addr < backup_start_addr &&
-                (LPVOID)end_addr < backup_start_addr ||
-            (LPVOID)start_addr > backup_end_addr &&
+                (LPVOID)end_addr <= backup_start_addr ||
+            (LPVOID)start_addr >= backup_end_addr &&
                 (LPVOID)end_addr > backup_end_addr) {
             continue;
         } else {
