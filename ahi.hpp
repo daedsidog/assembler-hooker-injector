@@ -5,15 +5,15 @@
 #include <string>
 #include <map>
 
-#define JMP_OPCODE_BYTES 0xe9, 0x0, 0x0, 0x0, 0x0
+#define JMP_OPCODE_BYTES  0xe9, 0x0, 0x0, 0x0, 0x0
 #define CALL_OPCODE_BYTES 0xe8, 0x0, 0x0, 0x0, 0x0
-#define NOP_OPCODE 0x90
-#define ADDR_SIZE 4
-#define JMP_OPCODE_SIZE 5
-#define CALL_OPCODE_SIZE 5
+#define NOP_OPCODE        0x90
+#define ADDR_SIZE         4
+#define JMP_OPCODE_SIZE   5
+#define CALL_OPCODE_SIZE  5
 
 class AHI {
-    static std::map<LPVOID, BYTE[JMP_OPCODE_SIZE]> func_backups;
+    static std::map<LPVOID, BYTE[JMP_OPCODE_SIZE]>     func_backups;
     static std::map<std::pair<LPVOID, LPVOID>, BYTE *> opcode_backups;
 
   public:

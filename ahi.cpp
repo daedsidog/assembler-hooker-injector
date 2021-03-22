@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-uintptr_t AHI::base_addr = 0x0;
-std::map<LPVOID, BYTE[JMP_OPCODE_SIZE]> AHI::func_backups;
+uintptr_t                                   AHI::base_addr = 0x0;
+std::map<LPVOID, BYTE[JMP_OPCODE_SIZE]>     AHI::func_backups;
 std::map<std::pair<LPVOID, LPVOID>, BYTE *> AHI::opcode_backups;
 
 void AHI::init(void) { base_addr = (uintptr_t)GetModuleHandle(nullptr); }
@@ -17,7 +17,7 @@ LPVOID AHI::hook_func(uintptr_t func_addr, LPVOID dst_func_addr) {
     }
     for (auto const &opcode_backup : opcode_backups) {
         LPVOID backup_start_addr = opcode_backup.first.first;
-        LPVOID backup_end_addr = opcode_backup.first.second;
+        LPVOID backup_end_addr   = opcode_backup.first.second;
         if ((LPVOID)func_addr >= backup_start_addr &&
             (LPVOID)func_addr <= backup_end_addr) {
             std::cerr << __FUNCTION__
@@ -152,10 +152,10 @@ LPVOID AHI::unhook_dll_func(std::string dll, std::string func_name) {
 LPVOID AHI::inject_func(uintptr_t start_addr, uintptr_t end_addr,
                         LPVOID func_addr) {
     start_addr = start_addr + base_addr;
-    end_addr = end_addr + base_addr;
+    end_addr   = end_addr + base_addr;
     for (auto const &opcode_backup : opcode_backups) {
         LPVOID backup_start_addr = opcode_backup.first.first;
-        LPVOID backup_end_addr = opcode_backup.first.second;
+        LPVOID backup_end_addr   = opcode_backup.first.second;
         if ((LPVOID)start_addr < backup_start_addr &&
                 (LPVOID)end_addr <= backup_start_addr ||
             (LPVOID)start_addr >= backup_end_addr &&
@@ -183,8 +183,8 @@ LPVOID AHI::inject_func(uintptr_t start_addr, uintptr_t end_addr,
                   << std::endl;
         return 0;
     }
-    uintptr_t size = end_addr - start_addr;
-    BYTE *backup = new BYTE[size];
+    uintptr_t size   = end_addr - start_addr;
+    BYTE *    backup = new BYTE[size];
     if (!ReadProcessMemory(process_handle, (LPVOID)start_addr, backup, size,
                            0)) {
         std::cerr << __FUNCTION__
@@ -241,7 +241,7 @@ LPVOID AHI::eject_func(uintptr_t start_addr) {
     start_addr = start_addr + base_addr;
     for (auto const &opcode_backup : opcode_backups) {
         LPVOID backup_start_addr = opcode_backup.first.first;
-        LPVOID backup_end_addr = opcode_backup.first.second;
+        LPVOID backup_end_addr   = opcode_backup.first.second;
         if ((LPVOID)start_addr == backup_start_addr) {
             HANDLE process_handle = GetCurrentProcess();
             if (!process_handle) {
