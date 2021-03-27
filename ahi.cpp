@@ -153,6 +153,10 @@ LPVOID AHI::inject_func(uintptr_t start_addr, uintptr_t end_addr,
                         LPVOID func_addr) {
     start_addr = start_addr + base_addr;
     end_addr   = end_addr + base_addr;
+    if(end_addr - start_addr < CALL_OPCODE_SIZE){
+        std::cerr << __FUNCTION__ << ": Not enough space to inject call instruction!" << std::endl;
+        return 0;
+    }
     for (auto const &opcode_backup : opcode_backups) {
         LPVOID backup_start_addr = opcode_backup.first.first;
         LPVOID backup_end_addr   = opcode_backup.first.second;
