@@ -1,5 +1,5 @@
-#ifndef _AHI_HPP_
-#define _AHI_HPP_
+#ifndef AHI_HPP_
+#define AHI_HPP_
 
 #include <windows.h>
 #include <string>
@@ -37,6 +37,9 @@ class AHI {
                               LPVOID func_addr);
     // Restore bytecodes & remove function injected at start_addr.
     static LPVOID eject_func(uintptr_t start_addr);
+
+    // Gets the absolute address given the relative virtual & base addresses.
+    static uintptr_t get_abs_addr(uintptr_t image_base, uintptr_t rva);
 };
 
 #endif

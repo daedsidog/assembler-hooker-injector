@@ -280,3 +280,7 @@ LPVOID AHI::eject_func(uintptr_t start_addr) {
               << (LPVOID)start_addr << "!" << std::endl;
     return 0;
 }
+
+uintptr_t AHI::get_abs_addr(uintptr_t image_base, uintptr_t rva){
+    return (rva - image_base) + base_addr;
+}
