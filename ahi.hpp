@@ -22,9 +22,9 @@ class AHI {
     // Sets the base address to that of the current program.
     static void init(void);
     // Hook function dst_func_addr to func_addr.
-    static LPVOID hook_func(uintptr_t func_addr, LPVOID dst_func_addr);
+    static LPVOID hook_func(uintptr_t func_addr, LPVOID dst_func_addr, bool silent = false);
     // Unhook from func_addr.
-    static LPVOID unhook_func(uintptr_t func_addr);
+    static LPVOID unhook_func(uintptr_t func_addr, bool silent = false);
     // Hook dst_func_addr to dll.func_name.
     static LPVOID hook_dll_func(std::string dll, std::string func_name,
                                 LPVOID dst_func_addr);

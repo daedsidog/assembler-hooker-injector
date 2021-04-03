@@ -8,7 +8,7 @@ std::map<std::pair<LPVOID, LPVOID>, BYTE *> AHI::opcode_backups;
 
 void AHI::init(void) { base_addr = (uintptr_t)GetModuleHandle(nullptr); }
 
-LPVOID AHI::hook_func(uintptr_t func_addr, LPVOID dst_func_addr) {
+LPVOID AHI::hook_func(uintptr_t func_addr, LPVOID dst_func_addr, bool silent) {
     func_addr = func_addr + base_addr;
     if (func_backups.find((LPVOID)func_addr) != func_backups.end()) {
         std::cerr << __FUNCTION__ << ": " << (LPVOID)func_addr
@@ -72,12 +72,14 @@ LPVOID AHI::hook_func(uintptr_t func_addr, LPVOID dst_func_addr) {
         func_backups.erase((LPVOID)func_addr);
         return 0;
     }
-    std::cout << "Hooked " << dst_func_relative_addr << " to "
-              << (LPVOID)func_addr << std::endl;
+    if(!silent){
+        std::cout << "Hooked " << dst_func_relative_addr << " to "
+                  << (LPVOID)func_addr << std::endl;
+    }
     return (LPVOID)func_addr;
 }
 
-LPVOID AHI::unhook_func(uintptr_t func_addr) {
+LPVOID AHI::unhook_func(uintptr_t func_addr, bool silent) {
     func_addr = func_addr + base_addr;
     if (func_backups.find((LPVOID)func_addr) == func_backups.end()) {
         std::cerr << __FUNCTION__ << ": " << func_addr << " is not hooked!"
@@ -105,7 +107,9 @@ LPVOID AHI::unhook_func(uintptr_t func_addr) {
                   << std::endl;
         return 0;
     }
-    std::cout << "Unhooked function from " << (LPVOID)func_addr << std::endl;
+    if(!silent){
+        std::cout << "Unhooked function from " << (LPVOID)func_addr << std::endl;
+    }
     func_backups.erase((LPVOID)func_addr);
     return (LPVOID)func_addr;
 }
