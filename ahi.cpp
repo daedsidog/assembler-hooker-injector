@@ -134,7 +134,7 @@ LPVOID AHI::hook_dll_func(std::string dll, std::string func_name,
     }
     // Pointer arithmetic required because hook_func doesn't expect absolute
     // address.
-    return hook_func((uintptr_t)func_addr - base_addr, dst_func_addr);
+    return hook_func((uintptr_t)func_addr - base_addr, dst_func_addr, silent);
 }
 
 LPVOID AHI::unhook_dll_func(std::string dll, std::string func_name,
@@ -156,7 +156,7 @@ LPVOID AHI::unhook_dll_func(std::string dll, std::string func_name,
     }
     // Pointer arithmetic required because unhook_func doesn't expect absolute
     // address.
-    return unhook_func((uintptr_t)func_addr - base_addr);
+    return unhook_func((uintptr_t)func_addr - base_addr, silent);
 }
 
 LPVOID AHI::inject_func(uintptr_t start_addr, uintptr_t end_addr,
