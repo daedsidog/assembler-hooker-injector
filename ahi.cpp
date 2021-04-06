@@ -14,6 +14,7 @@ LPVOID AHI::hook_func(uintptr_t func_addr, LPVOID dst_func_addr, bool silent) {
     if (func_backups.find((LPVOID)func_addr) != func_backups.end()) {
         std::cerr << __FUNCTION__ << ": " << (LPVOID)func_addr
                   << " is already hooked!" << std::endl;
+        return 0;
     }
     for (auto const &opcode_backup : opcode_backups) {
         LPVOID backup_start_addr = opcode_backup.first.first;
