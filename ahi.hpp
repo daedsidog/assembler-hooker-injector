@@ -17,11 +17,11 @@
 #define READABLE_RANGE_END '~'
 
 class AHI {
+    static uintptr_t base_addr;
     static std::map<LPVOID, BYTE[JMP_OPCODE_SIZE]>     func_backups;
     static std::map<std::pair<LPVOID, LPVOID>, BYTE *> opcode_backups;
 
   public:
-    static uintptr_t base_addr;
 
     // Set the base address to that of the current program.
     static void init(void);
@@ -45,6 +45,9 @@ class AHI {
                               LPVOID func_addr);
     // Restore bytecodes & remove function injected at start_addr.
     static LPVOID eject_func(uintptr_t start_addr);
+
+    // Get's the base address of the current process.
+    static uintptr_t get_base_addr();
 
     // Get the absolute address given the relative virtual & base addresses.
     static uintptr_t get_abs_addr(uintptr_t image_base, uintptr_t rva);
