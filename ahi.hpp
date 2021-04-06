@@ -46,10 +46,13 @@ class AHI {
     // Restore bytecodes & remove function injected at start_addr.
     static LPVOID eject_func(uintptr_t start_addr);
 
-    // Get's the base address of the current process.
+    // Get the base address of the current process.
     static uintptr_t get_base_addr();
 
-    // Get the absolute address given the relative virtual & base addresses.
+    // Get the relative offset given the virtual relative & base addresses.
+    static uintptr_t get_offset(uintptr_t image_base, uintptr_t rva);
+
+    // Get the absolute address given the virtual relative & base addresses.
     static uintptr_t get_abs_addr(uintptr_t image_base, uintptr_t rva);
 
     // Get readable string from byte stream.

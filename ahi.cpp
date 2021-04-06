@@ -298,6 +298,10 @@ uintptr_t AHI::get_base_addr(){
     return base_addr;
 }
 
+uintptr_t AHI::get_offset(uintptr_t image_base, uintptr_t rva){
+    return rva - image_base;
+}
+
 uintptr_t AHI::get_abs_addr(uintptr_t image_base, uintptr_t rva) {
     return (rva - image_base) + base_addr;
 }
