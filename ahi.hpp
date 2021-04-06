@@ -12,6 +12,10 @@
 #define JMP_OPCODE_SIZE   5
 #define CALL_OPCODE_SIZE  5
 
+#define UNREADABLE_CHAR_PLACEHOLDER '.'
+#define READABLE_RANGE_START ' '
+#define READABLE_RANGE_END '~'
+
 class AHI {
     static std::map<LPVOID, BYTE[JMP_OPCODE_SIZE]>     func_backups;
     static std::map<std::pair<LPVOID, LPVOID>, BYTE *> opcode_backups;
@@ -19,17 +23,21 @@ class AHI {
   public:
     static uintptr_t base_addr;
 
-    // Sets the base address to that of the current program.
+    // Set the base address to that of the current program.
     static void init(void);
+
     // Hook function dst_func_addr to func_addr.
     static LPVOID hook_func(uintptr_t func_addr, LPVOID dst_func_addr, bool silent = false);
+
     // Unhook from func_addr.
     static LPVOID unhook_func(uintptr_t func_addr, bool silent = false);
+
     // Hook dst_func_addr to dll.func_name.
     static LPVOID hook_dll_func(std::string dll, std::string func_name,
                                 LPVOID dst_func_addr, bool silent = false);
     // Unhook from dll.func_name.
     static LPVOID unhook_dll_func(std::string dll, std::string func_name, bool silent = false);
+
     // Change bytecodes [start_addr, end_addr) to NOP & inject func_addr to
     // start_addr. Mostly useful for injecting inline assembly in an address
     // range.
@@ -38,8 +46,11 @@ class AHI {
     // Restore bytecodes & remove function injected at start_addr.
     static LPVOID eject_func(uintptr_t start_addr);
 
-    // Gets the absolute address given the relative virtual & base addresses.
+    // Get the absolute address given the relative virtual & base addresses.
     static uintptr_t get_abs_addr(uintptr_t image_base, uintptr_t rva);
+
+    // Get readable string from byte stream.
+    static std::string stringify(char *buf, long len);
 };
 
 #endif

@@ -1,6 +1,7 @@
 #include "ahi.hpp"
 
 #include <iostream>
+#include <sstream>
 
 uintptr_t                                   AHI::base_addr = 0x0;
 std::map<LPVOID, BYTE[JMP_OPCODE_SIZE]>     AHI::func_backups;
@@ -295,4 +296,17 @@ LPVOID AHI::eject_func(uintptr_t start_addr) {
 
 uintptr_t AHI::get_abs_addr(uintptr_t image_base, uintptr_t rva) {
     return (rva - image_base) + base_addr;
+}
+
+std::string AHI::stringify(char *buf, long len){
+    std::stringstream sstream;
+    for(int i = 0; i < len; ++i){
+        if(buf[i] >= READABLE_RANGE_START && buf[i] <= READABLE_RANGE_END){
+            sstream << buf[i];
+        }
+        else {
+            sstream << UNREADABLE_CHAR_PLACEHOLDER;
+        }
+    }
+    return sstream.str();
 }
